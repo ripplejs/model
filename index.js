@@ -165,7 +165,7 @@ Observable.prototype.set = function(key, val) {
  * @param {String} path
  * @param {Mixed} value
  *
- * @api private;
+ * @api private
  */
 Observable.prototype._setPath = function(path, value) {
   var parts = path.split('.');

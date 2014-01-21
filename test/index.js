@@ -153,4 +153,45 @@ describe('Observable', function(){
     assert(called === 0);
   })
 
+  describe('watching arrays', function(){
+    var model, items;
+
+    beforeEach(function(){
+      model = observable({ items: [1,2,3] });
+    })
+
+    it('should watch for items being removed', function(done){
+      model.change('items', function(added, removed){
+        assert(removed[0] === 3);
+        assert(added.length === 0);
+        assert(model.get('items').length === 2);
+        done();
+      });
+      model.get('items').pop();
+    })
+
+    it('should watch for items being added', function(done){
+      var something = {};
+      model.change('items', function(added, removed){
+        assert(added[0] === something);
+        assert(removed.length === 0);
+        assert(model.get('items').length === 4);
+        done();
+      });
+      model.get('items').push(something);
+    })
+
+    it('should watch for items being sorted', function(done){
+      var something = {};
+      model.change('items', function(added, removed, sorted){
+        assert(removed.length === 0);
+        assert(added.length === 0);
+        assert(sorted === true);
+        done();
+      });
+      model.get('items').sort();
+    })
+
+  });
+
 });
