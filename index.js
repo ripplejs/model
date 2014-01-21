@@ -12,7 +12,6 @@ var Observer = require('./lib/observer');
  * @param {Object} data Pre-fill with data. This object will not be changed
  */
 function Observable(data){
-  if(!(this instanceof Observable)) return new Observable(data);
   this.attributes = {};
   this._observers = {};
   if(data) this.set(data);
@@ -210,4 +209,29 @@ Observable.prototype.get = function(key) {
   return this._getPath(key);
 };
 
-module.exports = Observable;
+/**
+ * Make any object observerable
+ *
+ * @param {Object} obj
+ *
+ * @return {Object}
+ */
+exports = module.exports = function(obj) {
+  obj = obj || {};
+  if(obj.__observable__) return;
+  var proxy = new Observable(obj);
+  obj.__observable__ = proxy;
+  obj.get = proxy.get.bind(proxy);
+  obj.set = proxy.set.bind(proxy);
+  obj.change = proxy.change.bind(proxy);
+  obj.computed = proxy.computed.bind(proxy);
+  proxy.attributes = obj;
+  return obj;
+};
+
+/**
+ * Expose constructor for custom use-cases
+ *
+ * @type {Function}
+ */
+exports.Observable = Observable;

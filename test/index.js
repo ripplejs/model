@@ -12,13 +12,13 @@ describe('Observable', function(){
   it('should set key and value', function(){
     var model = observable();
     model.set('foo', 'bar');
-    assert( model.attributes.foo === 'bar' );
+    assert( model.get('foo') === 'bar' );
   });
 
   it('should set key and value with an object', function(){
     var model = observable();
     model.set({ 'foo' : 'bar' });
-    assert( model.attributes.foo === 'bar' );
+    assert( model.get('foo') === 'bar' );
   });
 
   it('should emit change events', function(){
@@ -39,7 +39,7 @@ describe('Observable', function(){
   it('should set nested properties', function(){
     var model = observable();
     model.set('foo.bar', 'baz');
-    assert( model.attributes.foo.bar === 'baz' );
+    assert( model.get('foo').bar === 'baz' );
   });
 
   it('should get nested properties', function(){
@@ -193,5 +193,31 @@ describe('Observable', function(){
     })
 
   });
+
+  describe('mixins', function(){
+
+    it('should mixin to an object', function(){
+      var obj = {foo:'bar'};
+      observable(obj);
+      obj.set('foo','baz');
+      assert(obj.foo === 'baz');
+    });
+
+    /**
+     * This will change when we get native Proxy support
+     */
+
+    it('should not fire change events if a property is set', function(){
+      var called = false;
+      var obj = {foo:'bar'};
+      observable(obj);
+      obj.change('foo', function(){
+        called = true;
+      });
+      obj.foo = 'baz';
+      assert(called === false);
+    })
+
+  })
 
 });
