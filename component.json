@@ -2,7 +2,10 @@
   "name": "observable",
   "version": "0.1.0",
   "description": "Object with attribute getters and setters with events for watching for attribute changes",
-  "scripts": ["index.js"],
+  "scripts": [
+    "index.js",
+    "lib/observer.js"
+  ],
   "dependencies": {
     "component/emitter": "*"
   },
