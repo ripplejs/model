@@ -1,5 +1,6 @@
 var emitter = require('emitter');
 var Observer = require('./lib/observer');
+var keypath = require('keypath');
 
 /**
  * Observable.
@@ -152,49 +153,10 @@ Observable.prototype.set = function(key, val) {
   }
   var previous = this.get(key);
   if( previous === val ) return; // No change
-  this._setPath(key, val);
+  keypath.set(this.attributes, key, val);
   this.emit('change', key, val, previous);
   this.update(key);
   return this;
-};
-
-/**
- * Set a value on an object using a keypath. eg 'foo.bar.baz'
- *
- * @param {String} path
- * @param {Mixed} value
- *
- * @api private
- */
-Observable.prototype._setPath = function(path, value) {
-  var parts = path.split('.');
-  var target = this.attributes;
-  var last = parts.pop();
-  while(parts.length) {
-    part = parts.shift();
-    if(!target[part]) target[part] = {};
-    target = target[part];
-  }
-  target[last] = value;
-};
-
-/**
- * Get a value from an object using a keypath
- *
- * @param {String} path
- *
- * @api private
- * @return {Mixed}
- */
-Observable.prototype._getPath = function(path) {
-  var parts = path.split('.');
-  var value = this.attributes;
-  while(parts.length) {
-    var part = parts.shift();
-    value = value[part];
-    if(value === undefined) parts.length = 0;
-  }
-  return value;
 };
 
 /**
@@ -206,7 +168,7 @@ Observable.prototype._getPath = function(path) {
  * @return {Mixed}
  */
 Observable.prototype.get = function(key) {
-  return this._getPath(key);
+  return keypath.get(this.attributes, key);
 };
 
 /**

@@ -58,21 +58,57 @@ describe('Observable', function(){
     assert( model.get('razz.tazz.jazz') === undefined );
   })
 
-  it('should emit change events for nested properties', function(){
-    var match = 0;
-    var model = observable();
-    model.set('foo.bar', 'baz');
-    model.change('foo.bar', function(val){
-      assert(val === 'zab');
+  describe('events for nested properties', function(){
+    var model;
+
+    beforeEach(function(){
+      model = observable({
+        foo: {
+          bar: 'baz'
+        }
+      });
     });
-    model.change('foo', function(val){
-      assert(val.bar === "zab");
-    });
-    model.change(function(attr, val){
-      assert(attr === "foo.bar");
-      assert(val === "zab");
-    });
-    model.set('foo.bar', 'zab');
+
+    it('should emit events for the bottom edge', function(done){
+      model.change('foo.bar', function(val){
+        done();
+      });
+      model.set('foo.bar', 'zab');
+    })
+
+    it('should emit events in the middle', function(done){
+      model.change('foo', function(val){
+        done();
+      });
+      model.set('foo.bar', 'zab');
+    })
+
+    it('should emit events', function(done){
+      model.change(function(val){
+        done();
+      });
+      model.set('foo.bar', 'zab');
+    })
+
+    it('should not emit events if the value has not changed', function(){
+      var called = 0;
+      model.change('foo', function(val){
+        called++;
+      });
+      model.change('foo.bar', function(val){
+        called++;
+      });
+      model.change(function(val){
+        called++;
+      });
+      model.set('foo.bar', 'zab');
+      model.set('foo.bar', 'zab');
+      model.set('foo', {
+        bar: 'zab'
+      });
+      assert(called === 5);
+    })
+
   })
 
   it('should be able to do computed properties', function(){

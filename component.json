@@ -6,7 +6,10 @@
     "index.js",
     "lib/observer.js"
   ],
-  "local": ["array"],
+  "local": [
+    "array",
+    "keypath"
+  ],
   "paths": ["../"],
   "dependencies": {
     "component/emitter": "*"
