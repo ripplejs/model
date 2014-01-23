@@ -1,29 +1,29 @@
 var observable = require('observer');
 var assert = require('assert');
-var Model;
+var model;
 
 describe('Observer', function(){
 
   it('should set properties in the constructor', function(){
-    var model = observable({ 'foo' : 'bar' });
+    model = observable({ 'foo' : 'bar' });
     assert( model.get('foo') === 'bar' );
   })
 
   it('should set key and value', function(){
-    var model = observable();
+    model = observable();
     model.set('foo', 'bar');
     assert( model.get('foo') === 'bar' );
   });
 
   it('should set key and value with an object', function(){
-    var model = observable();
+    model = observable();
     model.set({ 'foo' : 'bar' });
     assert( model.get('foo') === 'bar' );
   });
 
   it('should emit change events', function(){
     var match = false;
-    var model = observable();
+    model = observable();
     model.change('foo', function(){
       match = true;
     });
@@ -37,13 +37,13 @@ describe('Observer', function(){
   });
 
   it('should set nested properties', function(){
-    var model = observable();
+    model = observable();
     model.set('foo.bar', 'baz');
     assert( model.get('foo').bar === 'baz' );
   });
 
   it('should get nested properties', function(){
-    var model = observable();
+    model = observable();
     model.set('foo', {
       bar: 'baz'
     });
@@ -51,7 +51,7 @@ describe('Observer', function(){
   });
 
   it('should return undefined for missing nested properties', function(){
-    var model = observable();
+    model = observable();
     model.set('razz.tazz', 'bar');
     assert( model.get('foo') === undefined );
     assert( model.get('foo.bar') === undefined );
@@ -59,7 +59,7 @@ describe('Observer', function(){
   })
 
   describe('events for nested properties', function(){
-    var model;
+    model;
 
     beforeEach(function(){
       model = observable({
@@ -82,7 +82,7 @@ describe('Observer', function(){
         called = true;
       });
       model.set('foo.bar', 'zab');
-      assert(called);
+      assert(called === true);
     })
 
     it.skip('should emit events', function(done){
@@ -114,7 +114,7 @@ describe('Observer', function(){
   })
 
   it('should be able to do computed properties', function(){
-    var model = observable({
+    model = observable({
       one: 1,
       two: 2
     });
@@ -125,7 +125,7 @@ describe('Observer', function(){
   })
 
   it('should emit change events for computed properties', function(done){
-    var model = observable({
+    model = observable({
       one: 1,
       two: 2
     });
@@ -140,7 +140,7 @@ describe('Observer', function(){
   })
 
   it('should use the change method for binding to changes', function(done){
-    var model = observable();
+    model = observable();
     model.change('one', function(change){
       assert(change === 1);
       done();
@@ -149,7 +149,7 @@ describe('Observer', function(){
   })
 
   if('should bind to all changes using the method', function(done){
-    var model = observable();
+    model = observable();
     model.watch(function(attr, value){
       assert(attr === 'one');
       assert(value === 1);
@@ -160,7 +160,7 @@ describe('Observer', function(){
 
   it('should return a method to unbind changes', function(){
     var called = 0;
-    var model = observable();
+    model = observable();
     var unbind = model.change('one', function(value){
       called += 1;
     });
@@ -171,7 +171,7 @@ describe('Observer', function(){
 
   it('should bind to changes of multiple properties', function(){
     var called = 0;
-    var model = observable();
+    model = observable();
     model.change(['one', 'two'], function(attr, value){
       called += 1;
     });
@@ -181,7 +181,7 @@ describe('Observer', function(){
 
   it('should unbind to changes of multiple properties', function(){
     var called = 0;
-    var model = observable();
+    model = observable();
     var unbind = model.change(['one', 'two'], function(attr, value){
       called += 1;
     });
@@ -192,7 +192,7 @@ describe('Observer', function(){
   })
 
   describe('watching arrays', function(){
-    var model, items;
+    var items;
 
     beforeEach(function(){
       model = observable({ items: [1,2,3] });
@@ -229,31 +229,5 @@ describe('Observer', function(){
     })
 
   });
-
-  describe('mixins', function(){
-
-    it('should mixin to an object', function(){
-      var obj = {foo:'bar'};
-      observable(obj);
-      obj.set('foo','baz');
-      assert(obj.foo === 'baz');
-    });
-
-    /**
-     * This will change when we get native Proxy support
-     */
-
-    it('should not fire change events if a property is set', function(){
-      var called = false;
-      var obj = {foo:'bar'};
-      observable(obj);
-      obj.change('foo', function(){
-        called = true;
-      });
-      obj.foo = 'baz';
-      assert(called === false);
-    })
-
-  })
 
 });

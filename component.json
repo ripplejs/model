@@ -4,19 +4,17 @@
   "description": "Object with attribute getters and setters with events for watching for attribute changes",
   "scripts": [
     "index.js",
-    "lib/observer.js"
+    "lib/path.js"
   ],
   "local": [
     "array",
-    "keypath",
-    "map",
-    "emitter-manager"
+    "keypath"
   ],
   "paths": ["../"],
   "dependencies": {
     "component/emitter": "*",
-    "component/type": "*",
-    "jkroso/equals": "*"
+    "jkroso/equals": "*",
+    "component/clone": "*"
   },
   "development": {
     "component/assert": "*"

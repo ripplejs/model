@@ -1,8 +1,27 @@
-var Observer = require('./lib/observer');
-var type = require('type');
+var PathObserver = require('./lib/path');
+var keypath = require('keypath');
 
 /**
- * Observable.
+ * Takes a path like ‘foo.bar.baz’ and returns
+ * an array we can iterate over for all parts.
+ * eg. [‘foo’, ‘foo.bar’, ‘foo.bar.baz’]
+ *
+ * @param {String} key
+ *
+ * @return {Array}
+ */
+function resolvePaths(key) {
+  var used = [];
+  var paths = key.split('.').map(function(path){
+    used.push(path);
+    return used.join('.');
+  });
+  // paths.pop();
+  return paths;
+}
+
+/**
+ * Observer.
  *
  * Watch an objects properties for changes.
  *
@@ -11,7 +30,8 @@ var type = require('type');
  *
  * @param {Object}
  */
-function Observable(obj){
+function Observer(obj){
+  if(!(this instanceof Observer)) return new Observer(obj);
   this.obj = obj || {};
   this.observers = {};
 }
@@ -24,9 +44,9 @@ function Observable(obj){
  * @param {Array} dependencies
  * @param {Function} fn
  *
- * @return {Observable}
+ * @return {Observer}
  */
-Observable.prototype.computed = function(name, dependencies, fn) {
+Observer.prototype.computed = function(name, dependencies, fn) {
   var self = this;
   function update() {
     self.set(name, fn.call(self));
@@ -37,29 +57,31 @@ Observable.prototype.computed = function(name, dependencies, fn) {
 };
 
 /**
- * Get or set the observer for a key
+ * Create or get the observer for a path
  *
- * @param {String} key
- * @param {Observer} observer
+ * @param {String} path
+ * @param {PathObserver} observer
  *
  * @api private
- * @return {void}
+ * @return {PathObserver}
  */
-Observable.prototype.observer = function(path) {
+Observer.prototype.path = function(path) {
   var cache = this.observers;
   if(cache[path]) return cache[path];
 
-  var observer = new Observer(this.obj, path);
+  var self = this;
+  var observer = new PathObserver(this.obj, path);
+  var paths = resolvePaths(path);
 
-  observer.on('change', function(paths){
+  /**
+   * Whenever the path changes, we need to check all
+   * the dependencies on this path and dispatch events
+   * on them too
+   */
+  observer.on('change', function(){
     paths.forEach(function(name){
-      if(!cache[name]) return;
-      cache[name].dispatch();
+      self.path(name).check();
     });
-  });
-
-  observer.on('remove', function(){
-    delete cache[observer.path];
   });
 
   cache[path] = observer;
@@ -74,20 +96,20 @@ Observable.prototype.observer = function(path) {
  *
  * @return {Function} Function to remove the change event
  */
-Observable.prototype.change = function(keys, fn) {
+Observer.prototype.change = function(keys, fn) {
   if(Array.isArray(keys) === false) keys = [keys];
   var self = this;
   var change = fn.bind(this);
 
   // Call this function whenever any of the keypaths change
-  var fns = keys.map(function(key){
-    return self.observer(key).change(change);
+  var unbinders = keys.map(function(key){
+    return self.path(key).change(change);
   });
 
   // Return a function to unbind all of the callbacks
   return function(){
-    fns.forEach(function(fn){
-      fn();
+    unbinders.forEach(function(unbind){
+      unbind();
     });
   };
 };
@@ -98,12 +120,12 @@ Observable.prototype.change = function(keys, fn) {
  * @param {String} key eg. 'foo.bar'
  * @param {Mixed} val
  */
-Observable.prototype.set = function(key, val) {
-  if( type(key) === 'object' ) {
+Observer.prototype.set = function(key, val) {
+  if( arguments.length === 1 ) {
     for(var name in key) this.set(name, key[name]);
     return this;
   }
-  this.observer(key).set(val);
+  this.path(key).value(val);
   return this;
 };
 
@@ -115,28 +137,8 @@ Observable.prototype.set = function(key, val) {
  * @api public
  * @return {Mixed}
  */
-Observable.prototype.get = function(key) {
-  return this.observer(key).get();
-};
-
-/**
- * Make any object observerable
- *
- * @param {Object} obj
- *
- * @return {Object}
- */
-exports = module.exports = function(obj) {
-  obj = obj || {};
-  if(obj.__observable__) return;
-  var proxy = new Observable(obj);
-  obj.__observable__ = proxy;
-  obj.get = proxy.get.bind(proxy);
-  obj.set = proxy.set.bind(proxy);
-  obj.change = proxy.change.bind(proxy);
-  obj.computed = proxy.computed.bind(proxy);
-  proxy.obj = obj;
-  return obj;
+Observer.prototype.get = function(path) {
+  return this.path(path).value();
 };
 
 /**
@@ -144,5 +146,4 @@ exports = module.exports = function(obj) {
  *
  * @type {Function}
  */
-exports.Observable = Observable;
-exports.Observer = Observer;
+module.exports = Observer;
