@@ -1,5 +1,5 @@
 {
-  "name": "observable",
+  "name": "observer",
   "version": "0.1.0",
   "description": "Object with attribute getters and setters with events for watching for attribute changes",
   "scripts": [
@@ -8,11 +8,15 @@
   ],
   "local": [
     "array",
-    "keypath"
+    "keypath",
+    "map",
+    "emitter-manager"
   ],
   "paths": ["../"],
   "dependencies": {
-    "component/emitter": "*"
+    "component/emitter": "*",
+    "component/type": "*",
+    "jkroso/equals": "*"
   },
   "development": {
     "component/assert": "*"

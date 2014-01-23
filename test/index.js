@@ -1,8 +1,8 @@
-var observable = require('observable');
+var observable = require('observer');
 var assert = require('assert');
 var Model;
 
-describe('Observable', function(){
+describe('Observer', function(){
 
   it('should set properties in the constructor', function(){
     var model = observable({ 'foo' : 'bar' });
@@ -76,14 +76,16 @@ describe('Observable', function(){
       model.set('foo.bar', 'zab');
     })
 
-    it('should emit events in the middle', function(done){
+    it('should emit events in the middle', function(){
+      var called = false;
       model.change('foo', function(val){
-        done();
+        called = true;
       });
       model.set('foo.bar', 'zab');
+      assert(called);
     })
 
-    it('should emit events', function(done){
+    it.skip('should emit events', function(done){
       model.change(function(val){
         done();
       });
@@ -92,22 +94,22 @@ describe('Observable', function(){
 
     it('should not emit events if the value has not changed', function(){
       var called = 0;
+      model.set('foo.bar', 'zab');
       model.change('foo', function(val){
         called++;
       });
       model.change('foo.bar', function(val){
         called++;
       });
-      model.change(function(val){
-        called++;
-      });
-      model.set('foo.bar', 'zab');
-      model.set('foo.bar', 'zab');
       model.set('foo', {
         bar: 'zab'
       });
-      assert(called === 5);
+      assert(called === 0);
     })
+
+  })
+
+  describe.skip('when properties are removed', function(){
 
   })
 
@@ -130,8 +132,8 @@ describe('Observable', function(){
     model.computed('three', ['one', 'two'], function(){
       return this.get('one') + this.get('two');
     });
-    model.change('three', function(value){
-      assert(value === 4);
+    model.change('three', function(change){
+      assert(change === 4);
       done();
     });
     model.set('one', 2);
@@ -139,8 +141,8 @@ describe('Observable', function(){
 
   it('should use the change method for binding to changes', function(done){
     var model = observable();
-    model.change('one', function(value, previous){
-      assert(value === 1);
+    model.change('one', function(change){
+      assert(change === 1);
       done();
     });
     model.set('one', 1);
@@ -197,9 +199,9 @@ describe('Observable', function(){
     })
 
     it('should watch for items being removed', function(done){
-      model.change('items', function(added, removed){
-        assert(removed[0] === 3);
-        assert(added.length === 0);
+      model.change('items', function(change){
+        assert(change.type === "remove");
+        assert(change.value[0] === 3);
         assert(model.get('items').length === 2);
         done();
       });
@@ -208,9 +210,9 @@ describe('Observable', function(){
 
     it('should watch for items being added', function(done){
       var something = {};
-      model.change('items', function(added, removed){
-        assert(added[0] === something);
-        assert(removed.length === 0);
+      model.change('items', function(change){
+        assert(change.type === 'add');
+        assert(change.value[0] === something);
         assert(model.get('items').length === 4);
         done();
       });
@@ -219,10 +221,8 @@ describe('Observable', function(){
 
     it('should watch for items being sorted', function(done){
       var something = {};
-      model.change('items', function(added, removed, sorted){
-        assert(removed.length === 0);
-        assert(added.length === 0);
-        assert(sorted === true);
+      model.change('items', function(change){
+        assert(change.type === 'sort');
         done();
       });
       model.get('items').sort();

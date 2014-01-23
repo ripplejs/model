@@ -1,6 +1,5 @@
-var emitter = require('emitter');
 var Observer = require('./lib/observer');
-var keypath = require('keypath');
+var type = require('type');
 
 /**
  * Observable.
@@ -10,18 +9,12 @@ var keypath = require('keypath');
  * Properties must be set using the `set` method for
  * changes to fire events.
  *
- * @param {Object} data Pre-fill with data. This object will not be changed
+ * @param {Object}
  */
-function Observable(data){
-  this.attributes = {};
-  this._observers = {};
-  if(data) this.set(data);
-};
-
-/**
- * Mixins
- */
-emitter(Observable.prototype);
+function Observable(obj){
+  this.obj = obj || {};
+  this.observers = {};
+}
 
 /**
  * Set an attribute to be computed and automatically
@@ -44,23 +37,6 @@ Observable.prototype.computed = function(name, dependencies, fn) {
 };
 
 /**
- * Create a new observer for a keypath. Pulls from
- * a cache if it exists already
- *
- * @param {String} key
- *
- * @api private
- * @return {void}
- */
-Observable.prototype.createObserver = function(key) {
-  if(this.observer(key)) return this.observer(key);
-  var value = this.get(key);
-  var observer = new Observer(value, key);
-  this.observer(key, observer);
-  return observer;
-}
-
-/**
  * Get or set the observer for a key
  *
  * @param {String} key
@@ -69,25 +45,25 @@ Observable.prototype.createObserver = function(key) {
  * @api private
  * @return {void}
  */
-Observable.prototype.observer = function(key, observer) {
-  if(!observer) return this._observers[key];
-  this._observers[key] = observer;
-};
+Observable.prototype.observer = function(path) {
+  var cache = this.observers;
+  if(cache[path]) return cache[path];
 
-/**
- * Fire an method when any attribute changes
- *
- * @param {Function} fn
- *
- * @return {Function} Function to unbind
- */
-Observable.prototype.watch = function(fn) {
-  var self = this;
-  fn = fn.bind(this);
-  this.on('change', fn);
-  return function(){
-    self.off('change', fn);
-  };
+  var observer = new Observer(this.obj, path);
+
+  observer.on('change', function(paths){
+    paths.forEach(function(name){
+      if(!cache[name]) return;
+      cache[name].dispatch();
+    });
+  });
+
+  observer.on('remove', function(){
+    delete cache[observer.path];
+  });
+
+  cache[path] = observer;
+  return observer;
 };
 
 /**
@@ -99,45 +75,21 @@ Observable.prototype.watch = function(fn) {
  * @return {Function} Function to remove the change event
  */
 Observable.prototype.change = function(keys, fn) {
-  if(typeof keys === "function") return this.watch(keys);
   if(Array.isArray(keys) === false) keys = [keys];
   var self = this;
   var change = fn.bind(this);
+
+  // Call this function whenever any of the keypaths change
   var fns = keys.map(function(key){
-    var observer = self.createObserver(key);
-    observer.on('change', change);
-    return function(){
-      observer.off('change', change);
-    };
+    return self.observer(key).change(change);
   });
+
+  // Return a function to unbind all of the callbacks
   return function(){
     fns.forEach(function(fn){
       fn();
     });
   };
-};
-
-/**
- * Fire changes for all parts of a keypath
- *
- * @param {String} key
- *
- * @api private
- * @return {void}
- */
-Observable.prototype.update = function(key) {
-  var parts = key.split('.');
-  var current = [];
-  var currentKey;
-  var currentValue;
-  var observer;
-  while(parts.length) {
-    current.push(parts.shift());
-    currentKey = current.join('.');
-    currentValue = this.get(currentKey);
-    observer = this.observer(currentKey);
-    if(observer) observer.change(currentValue);
-  }
 };
 
 /**
@@ -147,15 +99,11 @@ Observable.prototype.update = function(key) {
  * @param {Mixed} val
  */
 Observable.prototype.set = function(key, val) {
-  if( typeof key !== "string" ) {
+  if( type(key) === 'object' ) {
     for(var name in key) this.set(name, key[name]);
     return this;
   }
-  var previous = this.get(key);
-  if( previous === val ) return; // No change
-  keypath.set(this.attributes, key, val);
-  this.emit('change', key, val, previous);
-  this.update(key);
+  this.observer(key).set(val);
   return this;
 };
 
@@ -168,7 +116,7 @@ Observable.prototype.set = function(key, val) {
  * @return {Mixed}
  */
 Observable.prototype.get = function(key) {
-  return keypath.get(this.attributes, key);
+  return this.observer(key).get();
 };
 
 /**
@@ -187,7 +135,7 @@ exports = module.exports = function(obj) {
   obj.set = proxy.set.bind(proxy);
   obj.change = proxy.change.bind(proxy);
   obj.computed = proxy.computed.bind(proxy);
-  proxy.attributes = obj;
+  proxy.obj = obj;
   return obj;
 };
 
@@ -197,3 +145,4 @@ exports = module.exports = function(obj) {
  * @type {Function}
  */
 exports.Observable = Observable;
+exports.Observer = Observer;
