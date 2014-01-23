@@ -7,14 +7,15 @@
     "lib/path.js"
   ],
   "local": [
-    "array",
-    "keypath"
+    "array"
   ],
   "paths": ["../"],
   "dependencies": {
     "component/emitter": "*",
     "jkroso/equals": "*",
-    "component/clone": "*"
+    "component/clone": "*",
+    "ripplejs/keypath": "0.0.1",
+    "ripplejs/observable-array": "0.0.1"
   },
   "development": {
     "component/assert": "*"

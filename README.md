@@ -5,7 +5,7 @@ Watch an object and it's properties for changes, including nested properties.
 ## Install
 
 ```
-component install ripplet/observable
+component install ripples/observable
 ```
 
 ## Example

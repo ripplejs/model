@@ -76,7 +76,7 @@ Observer.prototype.path = function(path) {
   /**
    * Whenever the path changes, we need to check all
    * the dependencies on this path and dispatch events
-   * on them too
+   * on them too. This seems shitty here.
    */
   observer.on('change', function(){
     paths.forEach(function(name){
