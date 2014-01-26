@@ -1,13 +1,10 @@
 {
   "name": "observer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Object with attribute getters and setters with events for watching for attribute changes",
   "scripts": [
     "index.js",
     "lib/path.js"
-  ],
-  "local": [
-    "array"
   ],
   "paths": ["../"],
   "dependencies": {
