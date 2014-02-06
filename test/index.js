@@ -1,29 +1,33 @@
-var observable = require('observer');
+var state = require('observable');
 var assert = require('assert');
-var model;
 
-describe('Observer', function(){
+describe('ViewModel', function(){
+  var Model;
+
+  beforeEach(function(){
+    Model = state();
+  });
 
   it('should set properties in the constructor', function(){
-    model = observable({ 'foo' : 'bar' });
+    model = new Model({ 'foo' : 'bar' });
     assert( model.get('foo') === 'bar' );
   })
 
   it('should set key and value', function(){
-    model = observable();
+    model = new Model();
     model.set('foo', 'bar');
     assert( model.get('foo') === 'bar' );
   });
 
   it('should set key and value with an object', function(){
-    model = observable();
+    model = new Model();
     model.set({ 'foo' : 'bar' });
     assert( model.get('foo') === 'bar' );
   });
 
   it('should emit change events', function(){
     var match = false;
-    model = observable();
+    model = new Model();
     model.change('foo', function(){
       match = true;
     });
@@ -32,18 +36,18 @@ describe('Observer', function(){
   });
 
   it('should set properties in constructor', function(){
-    var obj = observable({ 'foo':'bar' });
+    var obj = new Model({ 'foo':'bar' });
     assert( obj.get('foo') === 'bar' );
   });
 
   it('should set nested properties', function(){
-    model = observable();
+    model = new Model();
     model.set('foo.bar', 'baz');
     assert( model.get('foo').bar === 'baz' );
   });
 
   it('should get nested properties', function(){
-    model = observable();
+    model = new Model();
     model.set('foo', {
       bar: 'baz'
     });
@@ -51,7 +55,7 @@ describe('Observer', function(){
   });
 
   it('should return undefined for missing nested properties', function(){
-    model = observable();
+    model = new Model();
     model.set('razz.tazz', 'bar');
     assert( model.get('foo') === undefined );
     assert( model.get('foo.bar') === undefined );
@@ -59,10 +63,10 @@ describe('Observer', function(){
   })
 
   describe('events for nested properties', function(){
-    model;
+    var model;
 
     beforeEach(function(){
-      model = observable({
+      model = new Model({
         foo: {
           bar: 'baz'
         }
@@ -109,28 +113,36 @@ describe('Observer', function(){
 
   })
 
-  describe.skip('when properties are removed', function(){
-
-  })
-
   it('should be able to do computed properties', function(){
-    model = observable({
+    Model.computed('three', ['one', 'two'], function(){
+      return this.get('one') + this.get('two')
+    });
+    model = new Model({
       one: 1,
       two: 2
-    });
-    model.computed('three', ['one', 'two'], function(){
-      return this.get('one') + this.get('two');
     });
     assert(model.get('three') === 3);
   })
 
-  it('should emit change events for computed properties', function(done){
-    model = observable({
+  it('should pass the values through to the callback', function(){
+    Model.computed('three', ['one', 'two'], function(one, two){
+      return one + two;
+    });
+    model = new Model({
       one: 1,
       two: 2
     });
-    model.computed('three', ['one', 'two'], function(){
-      return this.get('one') + this.get('two');
+    model.set('two', 3);
+    assert(model.get('three') === 4);
+  })
+
+  it('should emit change events for computed properties', function(done){
+    Model.computed('three', ['one', 'two'], function(){
+      return this.get('one') + this.get('two')
+    });
+    model = new Model({
+      one: 1,
+      two: 2
     });
     model.change('three', function(change){
       assert(change === 4);
@@ -140,7 +152,7 @@ describe('Observer', function(){
   })
 
   it('should use the change method for binding to changes', function(done){
-    model = observable();
+    model = new Model();
     model.change('one', function(change){
       assert(change === 1);
       done();
@@ -148,9 +160,9 @@ describe('Observer', function(){
     model.set('one', 1);
   })
 
-  if('should bind to all changes using the method', function(done){
-    model = observable();
-    model.watch(function(attr, value){
+  if('should bind to all changes', function(done){
+    model = new Model();
+    model.change(function(attr, value){
       assert(attr === 'one');
       assert(value === 1);
       done();
@@ -160,7 +172,7 @@ describe('Observer', function(){
 
   it('should return a method to unbind changes', function(){
     var called = 0;
-    model = observable();
+    model = new Model();
     var unbind = model.change('one', function(value){
       called += 1;
     });
@@ -171,7 +183,7 @@ describe('Observer', function(){
 
   it('should bind to changes of multiple properties', function(){
     var called = 0;
-    model = observable();
+    model = new Model();
     model.change(['one', 'two'], function(attr, value){
       called += 1;
     });
@@ -181,7 +193,7 @@ describe('Observer', function(){
 
   it('should unbind to changes of multiple properties', function(){
     var called = 0;
-    model = observable();
+    model = new Model();
     var unbind = model.change(['one', 'two'], function(attr, value){
       called += 1;
     });
@@ -195,7 +207,7 @@ describe('Observer', function(){
     var items;
 
     beforeEach(function(){
-      model = observable({ items: [1,2,3] });
+      model = new Model({ items: [1,2,3] });
     })
 
     it('should watch for items being removed', function(done){

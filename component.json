@@ -1,18 +1,13 @@
 {
-  "name": "observer",
-  "version": "0.1.1",
-  "description": "Object with attribute getters and setters with events for watching for attribute changes",
+  "name": "observable",
+  "version": "0.2.0",
+  "description": "A model for managing UI state with the ability to watch for changes",
   "scripts": [
-    "index.js",
-    "lib/path.js"
+    "index.js"
   ],
-  "paths": ["../"],
   "dependencies": {
     "component/emitter": "*",
-    "jkroso/equals": "*",
-    "component/clone": "*",
-    "ripplejs/keypath": "0.0.1",
-    "ripplejs/observable-array": "0.0.1"
+    "ripplejs/path-observer": "0.0.1"
   },
   "development": {
     "component/assert": "*"
