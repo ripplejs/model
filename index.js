@@ -82,7 +82,7 @@ module.exports = function(){
    * @param {Mixed} val
    */
   Model.prototype.set = function(key, val) {
-    if( arguments.length === 1 ) {
+    if( typeof key !== 'string' ) {
       for(var name in key) this.set(name, key[name]);
       return this;
     }

@@ -46,6 +46,12 @@ describe('Model', function(){
     assert( model.get('foo') === 'bar' );
   });
 
+  it('should set and object with a falsy 2nd param', function(){
+    model = new Model();
+    model.set({ 'foo' : 'bar' }, undefined);
+    assert( model.get('foo') === 'bar' );
+  });
+
   it('should emit change events', function(){
     var match = false;
     model = new Model();
