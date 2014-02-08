@@ -1,5 +1,5 @@
 {
-  "name": "observable",
+  "name": "model",
   "version": "0.2.0",
   "description": "A model for managing UI state with the ability to watch for changes",
   "scripts": [
