@@ -1,7 +1,7 @@
-var state = require('observable');
+var state = require('model');
 var assert = require('assert');
 
-describe('ViewModel', function(){
+describe('Model', function(){
   var Model;
 
   beforeEach(function(){
@@ -10,6 +10,17 @@ describe('ViewModel', function(){
 
   it('should set properties in the constructor', function(){
     model = new Model({ 'foo' : 'bar' });
+    assert( model.get('foo') === 'bar' );
+  })
+
+  it('should work without new', function(){
+    model = Model({ 'foo' : 'bar' });
+    assert( model.get('foo') === 'bar' );
+  })
+
+  it('should work without new and no properties', function(){
+    model = Model();
+    model.set('foo', 'bar');
     assert( model.get('foo') === 'bar' );
   })
 

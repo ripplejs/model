@@ -4,7 +4,7 @@ var emitter = require('emitter');
 module.exports = function(){
 
   /**
-   * ViewModel.
+   * Model.
    *
    * Watch an objects properties for changes.
    *
@@ -13,17 +13,17 @@ module.exports = function(){
    *
    * @param {Object}
    */
-  function ViewModel(props){
-    if(!(this instanceof ViewModel)) return new ViewModel(props);
+  function Model(props){
+    if(!(this instanceof Model)) return new Model(props);
     this.props = props || {};
     this.observer = observer(this.props);
-    ViewModel.emit('construct', this);
+    Model.emit('construct', this);
   }
 
   /**
    * Mixins
    */
-  emitter(ViewModel);
+  emitter(Model);
 
   /**
    * Set an attribute to be computed and automatically
@@ -33,10 +33,10 @@ module.exports = function(){
    * @param {Array} dependencies
    * @param {Function} fn
    *
-   * @return {ViewModel}
+   * @return {Model}
    */
-  ViewModel.computed = function(name, dependencies, fn) {
-    ViewModel.on('construct', function(self){
+  Model.computed = function(name, dependencies, fn) {
+    Model.on('construct', function(self){
       function callback() {
         var args = dependencies.map(function(key){
           return self.get(key);
@@ -60,7 +60,7 @@ module.exports = function(){
    *
    * @return {Function} Function to remove the change event
    */
-  ViewModel.prototype.change = function(key, fn) {
+  Model.prototype.change = function(key, fn) {
     var self = this;
     if(Array.isArray(key)) {
       var changes = key.map(function(k){
@@ -81,7 +81,7 @@ module.exports = function(){
    * @param {String} key eg. 'foo.bar'
    * @param {Mixed} val
    */
-  ViewModel.prototype.set = function(key, val) {
+  Model.prototype.set = function(key, val) {
     if( arguments.length === 1 ) {
       for(var name in key) this.set(name, key[name]);
       return this;
@@ -91,16 +91,21 @@ module.exports = function(){
   };
 
   /**
-   * Get an attribute using a keypath
+   * Get an attribute using a keypath. If an array
+   * of keys is passed in an object is returned with
+   * those keys
    *
-   * @param {String} key
+   * @param {String|Array} key
    *
    * @api public
    * @return {Mixed}
    */
-  ViewModel.prototype.get = function(keypath) {
+  Model.prototype.get = function(keypath) {
+    if(Array.isArray(keypath)) {
+      return keypath.map(this.get.bind(this));
+    }
     return this.observer(keypath).get();
   };
 
-  return ViewModel;
+  return Model;
 };
