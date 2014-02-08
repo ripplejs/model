@@ -14,7 +14,7 @@ module.exports = function(){
    * @param {Object}
    */
   function ViewModel(props){
-    if(!(this instanceof ViewModel)) return new ViewModel(obj);
+    if(!(this instanceof ViewModel)) return new ViewModel(props);
     this.props = props || {};
     this.observer = observer(this.props);
     ViewModel.emit('construct', this);
