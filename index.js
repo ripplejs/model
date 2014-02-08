@@ -102,7 +102,12 @@ module.exports = function(){
    */
   Model.prototype.get = function(keypath) {
     if(Array.isArray(keypath)) {
-      return keypath.map(this.get.bind(this));
+      var values = {};
+      var self = this;
+      keypath.forEach(function(key){
+        values[key] = self.get(key);
+      });
+      return values;
     }
     return this.observer(keypath).get();
   };
