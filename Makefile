@@ -11,9 +11,4 @@ clean:
 test: build
 	open test/index.html
 
-standalone: components
-	@component build --standalone Observer --name build.standalone
-	minify build/build.standalone.js build/build.standalone.min.js
-	gzip -c build/build.standalone.min.js > build/build.standalone.min.js.gz
-
 .PHONY: clean test

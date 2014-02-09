@@ -1,20 +1,22 @@
-# observable
+# model
+
+[![Build Status](https://travis-ci.org/ripplejs/model.png?branch=master)](https://travis-ci.org/ripplejs/model)
 
 Watch an object and it's properties for changes, including nested properties.
 
 ## Install
 
 ```
-component install ripples/observable
+component install ripples/model
 ```
 
 ## Example
 
 ```js
-var observable = require('observable');
+var model = require('model');
 
 // Creates a new model contructor
-var ViewModel = observable();
+var ViewModel = model();
 
 // Computed properties with dependencies
 ViewModel.computed('fullname', ['firstname', 'lastname'], function(firstname, lastname){
