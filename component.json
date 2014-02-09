@@ -7,7 +7,7 @@
   ],
   "dependencies": {
     "component/emitter": "*",
-    "ripplejs/path-observer": "0.0.1"
+    "ripplejs/path-observer": "0.0.2"
   },
   "development": {
     "component/assert": "*"

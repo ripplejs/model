@@ -230,43 +230,4 @@ describe('Model', function(){
     assert(called === 0);
   })
 
-  describe('watching arrays', function(){
-    var items;
-
-    beforeEach(function(){
-      model = new Model({ items: [1,2,3] });
-    })
-
-    it('should watch for items being removed', function(done){
-      model.change('items', function(change){
-        assert(change.type === "remove");
-        assert(change.value[0] === 3);
-        assert(model.get('items').length === 2);
-        done();
-      });
-      model.get('items').pop();
-    })
-
-    it('should watch for items being added', function(done){
-      var something = {};
-      model.change('items', function(change){
-        assert(change.type === 'add');
-        assert(change.value[0] === something);
-        assert(model.get('items').length === 4);
-        done();
-      });
-      model.get('items').push(something);
-    })
-
-    it('should watch for items being sorted', function(done){
-      var something = {};
-      model.change('items', function(change){
-        assert(change.type === 'sort');
-        done();
-      });
-      model.get('items').sort();
-    })
-
-  });
-
 });
