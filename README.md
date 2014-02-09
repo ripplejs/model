@@ -7,7 +7,7 @@ Watch an object and it's properties for changes, including nested properties.
 ## Install
 
 ```
-component install ripples/model
+component install ripplejs/model
 ```
 
 ## Example
