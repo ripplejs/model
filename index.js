@@ -26,29 +26,12 @@ module.exports = function(){
   emitter(Model);
 
   /**
-   * Set an attribute to be computed and automatically
-   * update when other keys are updated
-   *
-   * @param {String} key
-   * @param {Array} dependencies
-   * @param {Function} fn
+   * Use a plugin
    *
    * @return {Model}
    */
-  Model.computed = function(name, dependencies, fn) {
-    Model.on('construct', function(self){
-      function callback() {
-        var args = dependencies.map(function(key){
-          return self.get(key);
-        });
-        return fn.apply(self, args);
-      }
-      function update() {
-        self.set(name, callback());
-      }
-      self.change(dependencies, update);
-      update();
-    });
+  Model.use = function(fn, options){
+    fn(this, options);
     return this;
   };
 

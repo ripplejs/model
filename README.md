@@ -18,11 +18,6 @@ var model = require('model');
 // Creates a new model contructor
 var ViewModel = model();
 
-// Computed properties with dependencies
-ViewModel.computed('fullname', ['firstname', 'lastname'], function(firstname, lastname){
-  return firstname + ' ' + lastname;
-});
-
 // Create a new view-model object with these properties
 var model = new ViewModel{
   firstname: "Tom",
